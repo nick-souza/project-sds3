@@ -1,4 +1,27 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { SalePage } from "type/sale";
+import { formatLocalDate } from "utils/format";
+import { BASE_URL } from "utils/requests";
+
 function DataTable() {
+	//UseState to import the data from the backend
+	const [page, setPage] = useState<SalePage>({
+		first: true,
+		last: true,
+		number: 0,
+		totalElements: 0,
+		totalPages: 0,
+	});
+
+	useEffect(() => {
+		axios
+			.get(`${BASE_URL}/sales?page=0&size=20&sort=date,desc`)
+			.then((response) => {
+				setPage(response.data);
+			});
+	}, []);
+
 	return (
 		<div className="table-responsive">
 			<table className="table table-striped table-sm">
@@ -12,41 +35,17 @@ function DataTable() {
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
-						<td>22/04/2021</td>
-						<td>Barry Allen</td>
-						<td>34</td>
-						<td>25</td>
-						<td>15017.00</td>
-					</tr>
-					<tr>
-						<td>22/04/2021</td>
-						<td>Barry Allen</td>
-						<td>34</td>
-						<td>25</td>
-						<td>15017.00</td>
-					</tr>
-					<tr>
-						<td>22/04/2021</td>
-						<td>Barry Allen</td>
-						<td>34</td>
-						<td>25</td>
-						<td>15017.00</td>
-					</tr>
-					<tr>
-						<td>22/04/2021</td>
-						<td>Barry Allen</td>
-						<td>34</td>
-						<td>25</td>
-						<td>15017.00</td>
-					</tr>
-					<tr>
-						<td>22/04/2021</td>
-						<td>Barry Allen</td>
-						<td>34</td>
-						<td>25</td>
-						<td>15017.00</td>
-					</tr>
+					{/* Making this Tbody dynamic, to scale according to the data from the backend */}
+					{page.content?.map((x) => (
+						<tr key={x.id}>
+							{/* Formating the date using the helper function */}
+							<td>{formatLocalDate(x.date, "dd/MM/yyyy")}</td>
+							<td>{x.seller.name}</td>
+							<td>{x.visited}</td>
+							<td>{x.deals}</td>
+							<td>{x.amount.toFixed(2)}</td>
+						</tr>
+					))}
 				</tbody>
 			</table>
 		</div>

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
 import { SaleSum } from "type/sale";
 import { BASE_URL } from "utils/requests";
@@ -10,23 +11,27 @@ type ChartData = {
 };
 
 function DonutChart() {
-	let chartData: ChartData = { labels: [], series: [] };
-
-	//Using axios to make the request to be able to populate the chart with the data coming from the backend
-	//Getting the base url from the utils/request
-	//This method get from axios returns a promise, to make the request async
-	axios.get(`${BASE_URL}/sales/amount-by-seller`).then((response) => {
-		//We also have to define the type to be the SaleSum
-		const data = response.data as SaleSum[];
-		//We have to convert the response type to be the same as the chart requires, just an array with the values;
-		const myLabels = data.map((x) => x.sellerName);
-		const mySeries = data.map((x) => x.sum);
-
-		//Now adding to the chartData to finally be able to use on the chart:
-		chartData = { labels: myLabels, series: mySeries };
-
-		console.log(chartData);
+	const [chartData, setChartData] = useState<ChartData>({
+		labels: [],
+		series: [],
 	});
+
+	useEffect(() => {
+		//Using axios to make the request to be able to populate the chart with the data coming from the backend
+		//Getting the base url from the utils/request
+		//This method get from axios returns a promise, to make the request async
+		axios.get(`${BASE_URL}/sales/amount-by-seller`).then((response) => {
+			//We also have to define the type to be the SaleSum
+			const data = response.data as SaleSum[];
+			//We have to convert the response type to be the same as the chart requires, just an array with the values;
+			const myLabels = data.map((x) => x.sellerName);
+			const mySeries = data.map((x) => x.sum);
+
+			//Now adding to the chartData to finally be able to use on the chart:
+			setChartData({ labels: myLabels, series: mySeries });
+		});
+		//Since this is a async call, it will start to load and then move down to display the chart before the request is completed. So it will display with the empty data. We have to use the useEffect
+	}, []);
 
 	// const mockData = {
 	// 	series: [477138, 499928, 444867, 220426, 473088],
